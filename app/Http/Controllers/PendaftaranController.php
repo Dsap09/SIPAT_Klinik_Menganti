@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Antrean;
 use App\Models\Jadwal;
 use App\Models\Pasien;
+use App\Models\Poli;
 use App\Services\AuditLogger;
 use App\Services\QueueService;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +25,23 @@ class PendaftaranController extends Controller
 
     public function beranda(): View
     {
-        return view('beranda');
+        return view('beranda', [
+            'poli' => Poli::query()->withCount('dokter')->orderBy('Nama_Poli')->get(),
+            'jadwal' => $this->jadwalTersedia(),
+        ]);
+    }
+
+    public function cekStatus(Request $request): RedirectResponse
+    {
+        $nomor = strtoupper(trim((string) $request->query('no', '')));
+
+        if (! preg_match('/^A-\d{1,4}$/', $nomor)) {
+            return redirect()
+                ->route('beranda')
+                ->with('error', 'Masukkan nomor antrean dengan format yang benar, misalnya A-001.');
+        }
+
+        return redirect()->route('pendaftaran.status', $nomor);
     }
 
     public function form(): View
@@ -149,12 +166,14 @@ class PendaftaranController extends Controller
 
     private function jadwalTersedia()
     {
+        $urutan = array_flip(Jadwal::URUTAN_HARI);
+
         return Jadwal::query()
             ->with(['poli', 'dokter'])
             ->where('Sisa_Kuota', '>', 0)
-            ->orderBy('Hari_Layanan')
-            ->orderBy('Jam_Mulai')
-            ->get();
+            ->get()
+            ->sortBy(fn (Jadwal $item) => $urutan[$item->Hari_Layanan] ?? 99)
+            ->values();
     }
 
     private function cariAntrean(string $noAntrean): Antrean

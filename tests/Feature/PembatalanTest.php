@@ -92,6 +92,16 @@ class PembatalanTest extends TestCase
         ]);
     }
 
+    public function test_form_jadwal_ulang_tampil_untuk_antrean_menunggu(): void
+    {
+        $this->daftarUmum('JDW-01');
+
+        $this->get(route('pendaftaran.jadwalUlang.form', 'A-001'))
+            ->assertOk()
+            ->assertSee('Jadwalkan Ulang Pendaftaran')
+            ->assertSee('A-001');
+    }
+
     public function test_form_jadwal_ulang_ditolak_setelah_checkin(): void
     {
         $this->daftarUmum();

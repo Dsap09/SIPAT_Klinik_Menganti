@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['ID_Jadwal', 'Hari_Layanan', 'Jam_Mulai', 'Jam_Selesai', 'Kuota_Maksimal', 'Sisa_Kuota', 'ID_Poli', 'ID_Dokter'])]
 class Jadwal extends Model
 {
+    public const URUTAN_HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
     protected $table = 'JADWAL';
 
     protected $primaryKey = 'ID_Jadwal';

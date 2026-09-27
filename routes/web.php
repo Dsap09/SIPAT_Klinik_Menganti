@@ -5,6 +5,7 @@ use App\Http\Controllers\PendaftaranController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PendaftaranController::class, 'beranda'])->name('beranda');
+Route::get('/cek', [PendaftaranController::class, 'cekStatus'])->name('pendaftaran.cek');
 Route::get('/daftar', [PendaftaranController::class, 'form'])->name('pendaftaran.form');
 Route::post('/daftar', [PendaftaranController::class, 'simpan'])
     ->middleware('throttle:pendaftaran')

@@ -21,6 +21,9 @@ Dokumen perencanaan dan rencana sprint ada di `docs/` (mulai dari `docs/PLAN.md`
 - **Halaman pasien** (Bootstrap): `/`, `/daftar`, `/status/{noAntrean}`
 - **Panel staf** (Filament): `/panel` — akun seeder `admin`, `petugas`, `manajemen`, `dokter` (password `password`)
 
+Profil klinik (alamat, telepon, jam layanan, peta) diatur di `config/klinik.php`. Nilainya masih **contoh** —
+ganti dengan data resmi klinik lalu ubah `'contoh' => false` agar penanda di footer hilang.
+
 Jika tampilan panel tidak ter-style, jalankan `php artisan filament:assets`.
 
 ## Pengujian

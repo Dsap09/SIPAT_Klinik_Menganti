@@ -12,6 +12,8 @@ class PoliSeeder extends Seeder
         $poli = [
             ['ID_Poli' => 'POLI-01', 'Nama_Poli' => 'Poli Umum', 'Deskripsi' => 'Pelayanan pemeriksaan umum'],
             ['ID_Poli' => 'POLI-02', 'Nama_Poli' => 'Poli Gigi', 'Deskripsi' => 'Pelayanan kesehatan gigi dan mulut'],
+            ['ID_Poli' => 'POLI-03', 'Nama_Poli' => 'Poli Anak', 'Deskripsi' => 'Pelayanan kesehatan anak'],
+            ['ID_Poli' => 'POLI-04', 'Nama_Poli' => 'Poli KIA/KB', 'Deskripsi' => 'Pelayanan kesehatan ibu dan anak'],
         ];
 
         foreach ($poli as $data) {

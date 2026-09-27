@@ -121,3 +121,12 @@ Pengembangan minggu 8-12 (Sprint 1-5), pengujian 13-14, pelatihan 15, penutupan 
 ## 11. Status akhir MVP
 Seluruh item backlog v1.0 (Sprint 1-5) selesai. Berikutnya: pelaksanaan UAT bersama mitra klinik (minggu 13-14) menggunakan `docs/UAT.md`, pelatihan staf (minggu 15), dan penutupan proyek (minggu 16).
 
+## 12. Perombakan desain sisi pasien (setelah Sprint 5)
+- Desain baru berpalet **teal/hijau kesehatan** dengan design system terpusat di `resources/css/app.css`; ikon memakai komponen SVG inline `<x-si-icon>` (tanpa dependensi baru).
+- **Beranda** kini memuat hero + formulir cek status, empat langkah pendaftaran, kartu **Poli** dan daftar **Jadwal** yang dibaca langsung dari basis data, alur pasien BPJS vs umum, FAQ, serta footer kontak.
+- **Form pendaftaran** memakai kartu jadwal (kuota habis tidak dapat dipilih), pemilih jenis pasien, sidebar informasi, dan daftar jam layanan; **halaman status** memakai kartu tiket + timeline status; **jadwal ulang** dan **kartu antrian** ikut dirapikan.
+- Rute baru `GET /cek?no=A-001` untuk mencari status dari beranda.
+- Profil klinik (alamat, telepon, jam, peta) **dipusatkan di `config/klinik.php`** dan masih berupa **contoh**; footer menampilkan penanda sampai data diverifikasi klinik.
+- Data contoh diperkaya: 4 poli (Umum, Gigi, Anak, KIA/KB), 4 dokter, dan 8 jadwal mingguan.
+- Catatan riset: pencarian web untuk "Klinik Menganti" didominasi situs spam/SEO, sehingga tidak ada konten yang diambil dari internet; seluruh isi bersumber dari dokumen proyek dan basis data aplikasi.
+

@@ -4,40 +4,34 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title>@yield('title', 'Beranda') — SIPAT Klinik Menganti</title>
+    <meta name="theme-color" content="#0f766e">
+    <title>@yield('title', 'Beranda') — SIPAT {{ config('klinik.nama') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-light d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand fw-semibold" href="{{ route('beranda') }}">SIPAT</a>
-            <span class="navbar-text text-white-50 d-none d-sm-inline">Klinik Menganti</span>
+<body class="d-flex flex-column min-vh-100">
+    @include('partials.nav')
 
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/panel') }}">Masuk Petugas</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-
-    <main class="py-4 flex-grow-1">
-        <div class="container">
+    <main class="flex-grow-1">
+        <div class="container py-4">
             @if (session('sukses'))
-                <div class="alert alert-success">{{ session('sukses') }}</div>
+                <div class="alert alert-success d-flex align-items-start gap-2">
+                    <x-si-icon name="check-circle" class="sipat-icon" />
+                    <div>{{ session('sukses') }}</div>
+                </div>
             @endif
 
             @if (session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
+                <div class="alert alert-danger d-flex align-items-start gap-2">
+                    <x-si-icon name="alert" class="sipat-icon" />
+                    <div>{{ session('error') }}</div>
+                </div>
             @endif
 
             @yield('konten')
         </div>
     </main>
 
-    <footer class="text-center text-muted small py-3">
-        Sistem Antrian Online Terpadu — Klinik Menganti
-    </footer>
+    @include('partials.footer')
 
     @stack('skrip')
 </body>
