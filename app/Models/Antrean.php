@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -43,5 +44,18 @@ class Antrean extends Model
     public function jadwal(): BelongsTo
     {
         return $this->belongsTo(Jadwal::class, 'ID_Jadwal', 'ID_Jadwal');
+    }
+
+    public function bisaDibatalkan(): bool
+    {
+        return $this->Status === self::STATUS_MENUNGGU && $this->Waktu_CheckIn === null;
+    }
+
+    public function scopePadaTanggal(Builder $query, string $tanggal): Builder
+    {
+        return $query->whereBetween('Tanggal_Kunjungan', [
+            $tanggal.' 00:00:00',
+            $tanggal.' 23:59:59',
+        ]);
     }
 }

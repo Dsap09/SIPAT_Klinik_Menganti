@@ -3,8 +3,8 @@
 SIPAT (Sistem Antrian Online Terpadu) — Klinik Menganti. University IT-project-management coursework: a web-based clinic queue/registration system that unifies BPJS and general ("umum") patients into one fair queue.
 
 ## Current state
-- Laravel 13 app scaffolded at the repo root. Sprint 1 implemented: public online registration for umum patients, atomic single queue counter (`A-001`), responsive Bootstrap pages.
-- Sprint 2-5 (BPJS manual entry, check-in + queue card, dashboard, master data, notifications, backup, RBAC/audit) are NOT built yet.
+- All 5 sprints implemented. Laravel 13 app at the repo root: public registration for umum patients, atomic single queue counter (`A-001`), estimated arrival time, staff auth + RBAC, manual BPJS/walk-in entry, check-in verification + printable queue card, audit trail, cancel/reschedule with quota release, status polling, daily DB backup/restore, and a Filament v5 back-office (master data, dashboard, in-panel user guide).
+- UAT/Black Box checklist lives in `docs/UAT.md`; no remaining backlog items for v1.0 MVP.
 - Product backlog `Product_Backlog_Kelompok4.xlsx` stays the source of truth for work tracking. Execution plan lives in `docs/PLAN.md`.
 
 ## References (docs/)
@@ -12,15 +12,20 @@ SIPAT (Sistem Antrian Online Terpadu) — Klinik Menganti. University IT-project
 - `Product_Backlog_Kelompok4.xlsx` — sprint backlog, the source of truth for work tracking. Structure: THEME > EPIC > USER STORY > ACCEPTANCE CRITERIA. Columns: Sprint (1-5), Progress (To Do/In Progress/Done/Blocked), Versi (baseline v1.0 MVP), PIC, Priority (MoSCoW), PIC Status, Tested Design, Tested Code.
 - `ERD.png` — database schema (see "Data model" below).
 - `flowchat sipat.png` — end-to-end system flow (see "System flow" below).
+- `PLAN.md` — sprint execution plan + status per sprint.
+- `UAT.md` — Black Box + UAT checklist, mapped to the backlog acceptance criteria and the report's success metrics.
 
 ## Stack
-Laravel 13 (PHP 8.4) + MySQL database `sipat_klinik_menganti` + Bootstrap 5 via Vite. Agile/Scrum, ~5 sprints over 16 weeks. Laravel's default Tailwind scaffold was replaced with Bootstrap — do not reintroduce Tailwind.
+Laravel 13 (PHP 8.4) + MySQL database `sipat_klinik_menganti`. Patient-facing pages use Bootstrap 5 via Vite; the staff back-office ("panel") is **Filament v5** at `/panel` (Livewire 4, ships its own Tailwind-based assets). Laravel's default Tailwind scaffold was replaced with Bootstrap — do not use Tailwind for app pages; Filament's styles stay scoped to the panel.
 
 ## Commands
+- Prerequisite: PHP `ext-zip` must be enabled (Filament dependency).
 - Setup: `composer install` → `npm install` → `php artisan key:generate` → `php artisan migrate --seed`
 - Dev: `php artisan serve` + `npm run dev` (or `npm run build` for production assets)
 - Verify: `php artisan test` (feature tests) and `vendor/bin/pint` (formatting)
-- Tests run on SQLite `:memory:` (`phpunit.xml`) while the app uses MySQL — keep migrations portable.
+- If the panel renders unstyled, re-publish its assets: `php artisan filament:assets`
+- Backup: `php artisan sipat:backup` (scheduled daily 21:00 `Asia/Jakarta`, keeps 7 files in `storage/app/backups`). Restore: `php artisan sipat:restore {file} --force`. Run the scheduler locally with `php artisan schedule:work`.
+- Tests run on SQLite `:memory:` (`phpunit.xml`) while the app uses MySQL — keep migrations portable. Filament page/action tests need `Filament::setCurrentPanel(Filament::getPanel('panel'))` in `setUp()`.
 
 ## Core modules
 1. **Pendaftaran Online Pasien Umum** — general patients register via web; new patients fill personal data, returning patients enter their No RM. Receives queue number + estimated arrival time.
@@ -51,6 +56,19 @@ PMK No. 24 Tahun 2022 (electronic medical records) drives security: role-based a
 - All project docs are in **Indonesian**; write user-facing text and new docs in Indonesian.
 - Models set `$table`, `$primaryKey`, `$keyType='string'`, `$incrementing=false`, `$timestamps=false` (the ERD has no timestamp columns). Use Laravel 13's `#[Fillable]` / `#[Hidden]` attributes.
 - Queue numbers are per-day (`A-001`, zero-padded, one counter for BPJS + umum). Generate them only via `App\Services\QueueService` — it uses `Cache::lock` + a DB transaction, backed by the unique index `(Tanggal_Kunjungan, No_Antrean)`.
-- Online registration is for `Jenis_Pasien = UMUM` only; BPJS is entered by staff (Sprint 2).
+- Online registration is for `Jenis_Pasien = UMUM` only; BPJS + walk-in umum are entered by staff from the Filament panel (`/panel/antreans/create`), which still routes through `QueueService`.
+- Staff auth uses `PENGGUNA` (provider `pengguna`). Login is Filament's page, overridden by `App\Filament\Pages\Auth\Login` to use `Username` instead of `email`. For programmatic attempts use `Auth::attempt(['Username' => $u, 'password' => $p])` — the credential key must be lowercase `password` (`EloquentUserProvider` filters keys containing "password" case-sensitively), while `Pengguna::getAuthPasswordName()` returns `'Password'`. Seeded accounts: `admin`, `petugas`, `manajemen`, `dokter` / `password`.
+- `PENGGUNA` has **no `remember_token` column** (not in the ERD): the Filament login omits the remember-me checkbox and `Pengguna::getRememberTokenName()` returns `''` so Laravel never writes that column. Do not re-add a remember-me field unless you add the column.
+- `sessions.user_id` is deliberately `varchar(36)` (migration `2026_09_28_000002`): `ID_Pengguna` is a string (`USR-01`), and Laravel's default `bigint unsigned` makes MySQL reject the authenticated session write under `STRICT_TRANS_TABLES`, so logins silently never persist. SQLite tests cannot catch this — do not revert the column type.
+- Panel authorization: `Pengguna::canAccessPanel()` allows all 4 roles; each Filament resource gates access with `canAccess()` (master data = Admin only, antrean = Petugas+Admin). The `role` middleware alias still guards the plain-Blade queue card route `/kartu/{noAntrean}`.
+- Filament resources handle the string PKs fine; new records get their id from `App\Support\KodeGenerator` inside each `Create*` page's `mutateFormDataBeforeCreate`.
+- Patient-data changes are audited automatically via `#[ObservedBy([PasienObserver::class])]` + `App\Services\AuditLogger`; log queue actions explicitly with `AuditLogger::catat('Antrean', ...)`. `ID_Pengguna` is null for public (guest) registrations.
+- Queue estimation (backlog 1.1.2) lives in `QueueService::estimasi()` — `Jam_Mulai` + 15 min per queued patient, clamped to `Jam_Selesai`. Dashboard numbers come from `App\Services\DashboardMetrics` (single source for the widget + tests).
+- `ANTREAN.Tanggal_Kunjungan` is a DATE column but Eloquent stores it as `Y-m-d H:i:s`, so query it with the `Antrean::padaTanggal()` scope (BETWEEN `00:00:00`/`23:59:59`). A plain `where('Tanggal_Kunjungan', 'Y-m-d')` silently matches nothing on SQLite.
+- `APP_TIMEZONE=Asia/Jakarta` feeds `config('app.timezone')`; the scheduler and backup times use it.
+- Patient status "notifications" are poll-based: the status page hits `GET /status/{noAntrean}/data` every 30s and shows a banner when the status changes. There is no email/WhatsApp channel (out of scope).
+- Cancel/reschedule must go through `QueueService::batalkan()` / `jadwalkanUlang()` so quota is released with row locks; only `Menunggu` + not-checked-in antrean (see `Antrean::bisaDibatalkan()`) can be cancelled.
+- Public POST/JSON endpoints are rate limited via named limiters in `AppServiceProvider` (`config/sipat.php` → `THROTTLE_PENDAFTARAN`, `THROTTLE_STATUS`). Tests override `config('sipat.throttle.*')` to keep limits low.
+- The in-panel user guide is `App\Filament\Pages\Panduan` (menu "Bantuan"), view `resources/views/filament/pages/panduan.blade.php` — update it when user-facing flows change.
 - Backlog `Petunjuk` sheet maps PICs differently than the report's team table (backlog: Faris=PO, Adolfani=Scrum Master, Sendy=Designer, Doni=Developer, Rafi=Tester). Trust the backlog sheet for sprint assignments.
 - Testing = Black Box + UAT (weeks 13-14). Acceptance criteria that must hold: no duplicate/overlapping queue numbers in a 1-day audit, dashboard numbers exactly match DB, notification ≤60s after status change, home page loads ≤3s, mobile pages have no horizontal scroll.

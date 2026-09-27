@@ -49,6 +49,8 @@ class PendaftaranTest extends TestCase
             'Status' => Antrean::STATUS_MENUNGGU,
         ]);
 
+        $this->assertNotNull(Antrean::where('No_Antrean', 'A-001')->first()->Estimasi_Waktu);
+
         $this->assertSame(19, Jadwal::find('JDW-01')->Sisa_Kuota);
     }
 

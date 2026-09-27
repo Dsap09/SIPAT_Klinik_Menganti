@@ -19,7 +19,7 @@ Stack: **PHP/Laravel**, **MySQL**, **HTML/CSS/Bootstrap/JavaScript**. Metode: Ag
 - **Notifikasi** (5.1.1): MVP pakai polling halaman status, bukan websocket.
 - **Backup** (6.1.4): Laravel Scheduler + `mysqldump`.
 - **RBAC + audit trail** (6.1.1): middleware role + observer/event menulis ke `AUDIT_TRAIL`.
-- Frontend memakai **Vite + Bootstrap**.
+- Frontend pasien memakai **Vite + Bootstrap**; back-office memakai **Filament v5** (`/panel`).
 
 ## 3. Model data (ERD)
 | Tabel | Kolom kunci |
@@ -79,4 +79,45 @@ Pengembangan minggu 8-12 (Sprint 1-5), pengujian 13-14, pelatihan 15, penutupan 
 
 ### Berikutnya
 - Sprint 2: input BPJS manual, verifikasi check-in + cetak kartu, auth + RBAC + audit trail.
+
+### Sprint 2 — selesai
+- Auth staf memakai tabel `PENGGUNA` (`/masuk`, `/keluar`) + RBAC middleware `role`.
+- Loket (`/loket`, role Petugas/Admin): input manual pasien BPJS dari Mobile JKN -> nomor pada antrean terpadu.
+- Check-in: verifikasi nama + tanggal lahir; kartu antrian otomatis siap cetak (`/loket/kartu/{noAntrean}`).
+- Audit trail: perubahan data pasien (observer) + aksi check-in dicatat ke `AUDIT_TRAIL`.
+- 25 feature test lulus (`php artisan test`).
+
+### Berikutnya (Sprint 3)
+- Estimasi waktu kedatangan, dashboard monitoring, CRUD data master (poli/dokter/jadwal + kuota).
+
+### Sprint 3 — selesai
+- Back-office dipindahkan ke **Filament v5** di `/panel` (Livewire); halaman pasien tetap Bootstrap.
+- Data master: CRUD Poli, Dokter, Jadwal + kuota (khusus Admin), ID otomatis via `KodeGenerator`.
+- Loket di panel: input pasien BPJS/walk-in, check-in verifikasi tanggal lahir, ubah status, cetak kartu.
+- Dashboard widget (`DashboardMetrics`): total pasien hari ini, BPJS vs umum, status antrean — angka identik dengan basis data.
+- Estimasi waktu kedatangan (backlog 1.1.2): `QueueService::estimasi()` — 15 menit per pasien, dibatasi `Jam_Selesai`.
+- 33 feature test lulus (`php artisan test`).
+
+### Berikutnya (Sprint 4)
+- Batal/reschedule + pelepasan kuota, notifikasi ≤60 detik, optimasi ≤3 detik, backup harian otomatis.
+
+### Sprint 4 — selesai
+- Batal pendaftaran dari halaman status (kuota otomatis dilepas) + jadwalkan ulang ke jadwal lain.
+- Notifikasi status: endpoint `/status/{noAntrean}/data` + polling 30 detik di halaman status (≤60 detik).
+- Performa: eager loading, scope `padaTanggal()` (index-friendly), index `ANTREAN.Status`, dan tes batas query/waktu.
+- Backup harian `sipat:backup` (terjadwal 21:00 Asia/Jakarta, simpan 7 terakhir) + `sipat:restore` untuk pemulihan.
+- 47 feature test lulus (`php artisan test`).
+
+### Berikutnya (Sprint 5)
+- Panduan pengguna singkat, hardening, persiapan UAT.
+
+### Sprint 5 — selesai
+- Panduan pengguna 1 halaman di panel (menu Bantuan, `/panel/panduan`) untuk semua peran.
+- Hardening: rate limit endpoint publik (`config/sipat.php`), `noindex` halaman pasien, validasi & otorisasi ditinjau ulang.
+- Audit antrean 1 hari: tes otomatis non-duplikat/berurutan + konsistensi kuota setelah batal/jadwal ulang.
+- Checklist Black Box + UAT di `docs/UAT.md`, dipetakan ke acceptance criteria backlog dan metrik keberhasilan laporan.
+- 54 feature test lulus (`php artisan test`).
+
+## 11. Status akhir MVP
+Seluruh item backlog v1.0 (Sprint 1-5) selesai. Berikutnya: pelaksanaan UAT bersama mitra klinik (minggu 13-14) menggunakan `docs/UAT.md`, pelatihan staf (minggu 15), dan penutupan proyek (minggu 16).
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Pengguna;
 use App\Models\User;
 
 return [
@@ -40,7 +41,7 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'pengguna',
         ],
     ],
 
@@ -62,6 +63,11 @@ return [
     */
 
     'providers' => [
+        'pengguna' => [
+            'driver' => 'eloquent',
+            'model' => Pengguna::class,
+        ],
+
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),

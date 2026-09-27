@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Observers\PasienObserver;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['ID_Pasien', 'No_RM', 'Nama_Lengkap', 'Tgl_Lahir', 'Alamat', 'Jenis_Pasien', 'No_BPJS'])]
+#[ObservedBy([PasienObserver::class])]
 class Pasien extends Model
 {
     public const JENIS_UMUM = 'UMUM';
