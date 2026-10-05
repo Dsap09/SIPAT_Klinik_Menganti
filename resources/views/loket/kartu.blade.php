@@ -3,8 +3,8 @@
 @section('title', 'Kartu Antrian')
 
 @section('konten')
-    <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-6">
+    <div class="row justify-content-center kartu-cetak-baris">
+        <div class="col-md-7 col-lg-6 kartu-cetak-kolom">
             <div class="queue-ticket">
                 <div class="card-body p-4 text-center">
                     <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
@@ -50,11 +50,15 @@
                 </div>
             </div>
 
-            <div class="d-flex flex-wrap gap-2 mt-3 no-print">
+            <div class="d-flex flex-wrap align-items-center gap-2 mt-3 no-print d-print-none">
                 <button type="button" class="btn btn-primary" onclick="window.print()">
                     <x-si-icon name="ticket" class="sipat-icon-sm" /> Cetak Kartu
                 </button>
                 <a href="{{ url('/panel/antreans') }}" class="btn btn-outline-secondary">Kembali ke Antrean</a>
+                <p class="text-muted small mb-0 w-100">
+                    Di dialog cetak, pilih ukuran kertas sesuai printer: 58/80&nbsp;mm untuk printer thermal,
+                    atau A4/Letter bila memakai printer biasa. Kartu otomatis mengisi lebar kertas tersebut.
+                </p>
             </div>
         </div>
     </div>

@@ -603,20 +603,64 @@ h4 {
 }
 
 @media print {
-    .no-print,
-    .sipat-navbar,
-    .sipat-footer,
-    .sticky-cta {
+    /* Ukuran kertas mengikuti pilihan di dialog cetak (mis. 80mm untuk printer
+       thermal, atau A4). Kartu otomatis mengisi lebar kertas yang dipilih. */
+    @page {
+        margin: 4mm;
+    }
+
+    body .no-print,
+    .d-print-none,
+    body .sipat-navbar,
+    body .sipat-footer,
+    body .sticky-cta {
         display: none !important;
     }
 
+    html,
     body {
+        margin: 0;
+        padding: 0;
         background: #fff;
+    }
+
+    main {
+        padding: 0 !important;
+    }
+
+    main .container {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    .kartu-cetak-baris {
+        display: block !important;
+        margin: 0 !important;
+    }
+
+    .kartu-cetak-kolom {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: none !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
     }
 
     .card,
     .queue-ticket {
         box-shadow: none !important;
         border-color: #cbd5e1 !important;
+    }
+
+    .queue-ticket {
+        page-break-inside: avoid;
+    }
+
+    .brand-mark {
+        background: none !important;
+        color: var(--sipat-primary) !important;
+        border: 2px solid var(--sipat-primary);
+        box-shadow: none !important;
     }
 }
