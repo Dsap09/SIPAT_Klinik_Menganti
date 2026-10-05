@@ -15,7 +15,7 @@ class AuditLogger
             'Waktu_Akses' => now(),
             'Entitas_Terdampak' => $entitasTerdampak,
             'Deskripsi_Aksi' => $deskripsiAksi,
-            'ID_Pengguna' => $idPengguna ?? Auth::id(),
+            'ID_Pengguna' => $idPengguna ?? Auth::guard('web')->id(),
         ]);
     }
 }

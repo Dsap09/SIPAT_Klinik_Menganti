@@ -29,26 +29,18 @@ class DashboardTest extends TestCase
         return Pengguna::where('Username', $username)->first();
     }
 
-    private function daftarUmum(string $nama = 'Budi Santoso'): void
+    private function daftarUmum(string $nama = 'Budi Santoso', string $jadwal = 'JDW-01'): void
     {
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
-            'Nama_Lengkap' => $nama,
-            'Tgl_Lahir' => '1990-05-12',
-        ])->assertSessionHasNoErrors();
+        $pasien = $this->buatPasien(['Nama_Lengkap' => $nama]);
+
+        $this->daftarkanAntrean($pasien, $jadwal);
     }
 
     public function test_metrik_dashboard_sama_persis_dengan_basis_data(): void
     {
         $this->daftarUmum('Budi Santoso');
 
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-02',
-            'jenis' => 'baru',
-            'Nama_Lengkap' => 'Siti Aminah',
-            'Tgl_Lahir' => '1988-08-08',
-        ])->assertSessionHasNoErrors();
+        $this->daftarUmum('Siti Aminah', 'JDW-02');
 
         Antrean::where('No_Antrean', 'A-001')->update([
             'Status' => Antrean::STATUS_SELESAI,

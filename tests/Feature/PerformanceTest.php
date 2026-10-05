@@ -19,7 +19,7 @@ class PerformanceTest extends TestCase
 
     public function test_halaman_publik_memuat_di_bawah_tiga_detik_dengan_query_terbatas(): void
     {
-        foreach (['/', '/daftar'] as $url) {
+        foreach (['/', '/daftar', '/pasien/login', '/pasien/register'] as $url) {
             DB::flushQueryLog();
             DB::enableQueryLog();
 
@@ -37,12 +37,7 @@ class PerformanceTest extends TestCase
 
     public function test_halaman_status_tidak_menjalankan_query_berlebihan(): void
     {
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
-            'Nama_Lengkap' => 'Budi Santoso',
-            'Tgl_Lahir' => '1990-05-12',
-        ])->assertSessionHasNoErrors();
+        $this->daftarkanAntrean($this->buatPasien(['Nama_Lengkap' => 'Budi Santoso']));
 
         DB::flushQueryLog();
         DB::enableQueryLog();

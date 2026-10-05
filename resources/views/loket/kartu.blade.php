@@ -23,6 +23,9 @@
                     </p>
 
                     <dl class="row mb-0 text-start small">
+                        <dt class="col-5 text-muted fw-normal">No RM</dt>
+                        <dd class="col-7 fw-semibold">{{ $antrean->pasien->No_RM ?? '-' }}</dd>
+
                         <dt class="col-5 text-muted fw-normal">Dokter</dt>
                         <dd class="col-7 fw-semibold">{{ $antrean->jadwal->dokter->Nama_Dokter }}</dd>
 

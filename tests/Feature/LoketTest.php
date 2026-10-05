@@ -32,12 +32,12 @@ class LoketTest extends TestCase
 
     private function daftarUmum(string $nama = 'Budi Santoso', string $tglLahir = '1990-05-12'): void
     {
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
+        $pasien = $this->buatPasien([
             'Nama_Lengkap' => $nama,
             'Tgl_Lahir' => $tglLahir,
-        ])->assertSessionHasNoErrors();
+        ]);
+
+        $this->daftarkanAntrean($pasien);
     }
 
     private function antrean(string $noAntrean): Antrean
@@ -132,7 +132,7 @@ class LoketTest extends TestCase
         );
     }
 
-    public function test_checkin_gagal_jika_tanggal_lahir_tidak_cocok(): void
+    public function test_checkin_gagal_jika_no_rm_tidak_cocok(): void
     {
         $this->daftarUmum('Budi Santoso', '1990-05-12');
 
@@ -140,10 +140,11 @@ class LoketTest extends TestCase
 
         Livewire::test(ListAntreans::class)
             ->callTableAction('checkin', $this->antrean('A-001'), [
-                'tanggal_lahir' => '1991-01-01',
+                'no_rm' => 'RM-2099-9999',
             ]);
 
         $this->assertNull($this->antrean('A-001')->Waktu_CheckIn);
+        $this->assertSame(Antrean::STATUS_MENUNGGU, $this->antrean('A-001')->Status);
         $this->assertDatabaseMissing('AUDIT_TRAIL', [
             'Entitas_Terdampak' => 'Antrean',
         ]);
@@ -155,13 +156,17 @@ class LoketTest extends TestCase
 
         $this->actingAs($this->petugas());
 
+        $noRm = $this->antrean('A-001')->pasien->No_RM;
+
         Livewire::test(ListAntreans::class)
+            ->assertSee($noRm)
             ->callTableAction('checkin', $this->antrean('A-001'), [
-                'tanggal_lahir' => '1990-05-12',
+                'no_rm' => strtolower($noRm),
             ])
             ->assertHasNoTableActionErrors();
 
         $this->assertNotNull($this->antrean('A-001')->Waktu_CheckIn);
+        $this->assertSame(Antrean::STATUS_MENUNGGU, $this->antrean('A-001')->Status);
 
         $this->get(route('kartu', 'A-001'))
             ->assertOk()

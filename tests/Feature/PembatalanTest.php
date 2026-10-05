@@ -20,12 +20,9 @@ class PembatalanTest extends TestCase
 
     private function daftarUmum(string $jadwal = 'JDW-01', string $nama = 'Budi Santoso'): void
     {
-        $this->post('/daftar', [
-            'ID_Jadwal' => $jadwal,
-            'jenis' => 'baru',
-            'Nama_Lengkap' => $nama,
-            'Tgl_Lahir' => '1990-05-12',
-        ])->assertSessionHasNoErrors();
+        $pasien = $this->buatPasien(['Nama_Lengkap' => $nama]);
+
+        $this->daftarkanAntrean($pasien, $jadwal);
     }
 
     private function antrean(string $noAntrean): Antrean

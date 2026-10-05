@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Pasien;
 use App\Models\Pengguna;
 use App\Models\User;
 
@@ -43,6 +44,11 @@ return [
             'driver' => 'session',
             'provider' => 'pengguna',
         ],
+
+        'pasien' => [
+            'driver' => 'session',
+            'provider' => 'pasien',
+        ],
     ],
 
     /*
@@ -66,6 +72,11 @@ return [
         'pengguna' => [
             'driver' => 'eloquent',
             'model' => Pengguna::class,
+        ],
+
+        'pasien' => [
+            'driver' => 'eloquent',
+            'model' => Pasien::class,
         ],
 
         'users' => [

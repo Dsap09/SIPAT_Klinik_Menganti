@@ -5,8 +5,8 @@ namespace App\Filament\Resources\Antreans\Tables;
 use App\Models\Antrean;
 use App\Services\AuditLogger;
 use Filament\Actions\Action;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -23,6 +23,9 @@ class AntreansTable
                     ->label('No')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('pasien.No_RM')
+                    ->label('No RM')
+                    ->searchable(),
                 TextColumn::make('pasien.Nama_Lengkap')
                     ->label('Nama')
                     ->searchable(),
@@ -69,18 +72,18 @@ class AntreansTable
                     ->visible(fn (Antrean $record): bool => $record->Waktu_CheckIn === null
                         && $record->Status !== Antrean::STATUS_BATAL)
                     ->modalHeading(fn (Antrean $record): string => "Verifikasi Check-in {$record->No_Antrean}")
-                    ->modalDescription('Cocokkan tanggal lahir pasien dengan data pendaftaran.')
+                    ->modalDescription('Cocokkan nomor rekam medis (No RM) pasien dengan data pendaftaran.')
                     ->form([
-                        DatePicker::make('tanggal_lahir')
-                            ->label('Tanggal Lahir Pasien')
-                            ->maxDate(today())
+                        TextInput::make('no_rm')
+                            ->label('No RM Pasien')
+                            ->placeholder('Contoh: RM-2026-0001')
                             ->required(),
                     ])
                     ->action(function (Antrean $record, array $data, Action $action): void {
-                        if ($record->pasien->Tgl_Lahir->toDateString() !== $data['tanggal_lahir']) {
+                        if (strtoupper($record->pasien->No_RM) !== strtoupper(trim((string) $data['no_rm']))) {
                             Notification::make()
                                 ->title('Verifikasi gagal')
-                                ->body('Tanggal lahir tidak cocok dengan data pasien.')
+                                ->body('No RM tidak cocok dengan data pasien.')
                                 ->danger()
                                 ->send();
 

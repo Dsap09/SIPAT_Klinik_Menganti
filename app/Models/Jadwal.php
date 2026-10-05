@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -40,5 +41,20 @@ class Jadwal extends Model
     public function tersedia(): bool
     {
         return $this->Sisa_Kuota > 0;
+    }
+
+    /**
+     * Jadwal dengan kuota tersisa, diurutkan sesuai urutan hari layanan.
+     */
+    public static function tersediaUrutHari(): Collection
+    {
+        $urutan = array_flip(self::URUTAN_HARI);
+
+        return static::query()
+            ->with(['poli', 'dokter'])
+            ->where('Sisa_Kuota', '>', 0)
+            ->get()
+            ->sortBy(fn (Jadwal $item) => $urutan[$item->Hari_Layanan] ?? 99)
+            ->values();
     }
 }

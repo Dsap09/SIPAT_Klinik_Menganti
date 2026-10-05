@@ -19,51 +19,49 @@ class PendaftaranTest extends TestCase
         $this->seed();
     }
 
-    public function test_halaman_form_pendaftaran_tampil(): void
+    public function test_halaman_daftar_menampilkan_gerbang_akun(): void
     {
         $this->get('/daftar')
             ->assertOk()
-            ->assertSee('Pendaftaran Online Pasien Umum');
+            ->assertSee('Masuk Akun Pasien')
+            ->assertSee('Daftar Akun Baru');
     }
 
-    public function test_pasien_baru_bisa_mendaftar_dan_mendapat_nomor_antrean(): void
+    public function test_pasien_terautentikasi_diarahkan_ke_pemilihan_jadwal(): void
     {
-        $response = $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
-            'Nama_Lengkap' => 'Budi Santoso',
-            'Tgl_Lahir' => '1990-05-12',
-            'Alamat' => 'Jl. Raya Menganti No. 1',
-        ]);
+        $pasien = $this->buatPasien();
 
-        $response->assertRedirect(route('pendaftaran.status', 'A-001'));
+        $this->actingAs($pasien, 'pasien')
+            ->get('/daftar')
+            ->assertRedirect(route('pasien.daftar'));
+    }
 
-        $this->assertDatabaseHas('PASIEN', [
-            'Nama_Lengkap' => 'Budi Santoso',
-            'Jenis_Pasien' => Pasien::JENIS_UMUM,
-            'No_RM' => null,
-        ]);
+    public function test_kuota_habis_ditolak_saat_daftar_berobat(): void
+    {
+        $pasien = $this->buatPasien();
 
-        $this->assertDatabaseHas('ANTREAN', [
-            'No_Antrean' => 'A-001',
-            'Status' => Antrean::STATUS_MENUNGGU,
-        ]);
+        $this->actingAs($pasien, 'pasien');
 
-        $this->assertNotNull(Antrean::where('No_Antrean', 'A-001')->first()->Estimasi_Waktu);
+        Jadwal::where('ID_Jadwal', 'JDW-01')->update(['Sisa_Kuota' => 1]);
 
-        $this->assertSame(19, Jadwal::find('JDW-01')->Sisa_Kuota);
+        $this->post(route('pasien.daftar.simpan'), ['ID_Jadwal' => 'JDW-01'])
+            ->assertSessionHasNoErrors();
+
+        $this->actingAs($this->buatPasien(['Nama_Lengkap' => 'Pasien Kedua']), 'pasien');
+
+        $this->post(route('pasien.daftar.simpan'), ['ID_Jadwal' => 'JDW-01'])
+            ->assertSessionHasErrors('ID_Jadwal');
+
+        $this->assertDatabaseCount('ANTREAN', 1);
+        $this->assertSame(0, Jadwal::find('JDW-01')->Sisa_Kuota);
     }
 
     public function test_nomor_antrean_berurutan_tanpa_duplikat(): void
     {
-        foreach (['Budi', 'Siti', 'Agus'] as $nama) {
-            $this->post('/daftar', [
-                'ID_Jadwal' => 'JDW-01',
-                'jenis' => 'baru',
-                'Nama_Lengkap' => $nama,
-                'Tgl_Lahir' => '1990-05-12',
-                'Alamat' => 'Jl. Raya Menganti',
-            ])->assertSessionHasNoErrors();
+        for ($i = 1; $i <= 3; $i++) {
+            $this->actingAs($this->buatPasien(['Nama_Lengkap' => "Pasien {$i}"]), 'pasien');
+            $this->post(route('pasien.daftar.simpan'), ['ID_Jadwal' => 'JDW-01'])
+                ->assertSessionHasNoErrors();
         }
 
         $this->assertSame(
@@ -74,22 +72,38 @@ class PendaftaranTest extends TestCase
         $this->assertSame(3, Antrean::distinct()->count('No_Antrean'));
     }
 
-    public function test_pasien_lama_bisa_mendaftar_dengan_no_rm(): void
+    public function test_halaman_status_menampilkan_nomor_antrean(): void
+    {
+        $pasien = $this->buatPasien(['Nama_Lengkap' => 'Budi Santoso']);
+
+        $this->daftarkanAntrean($pasien);
+
+        $this->get('/status/A-001')
+            ->assertOk()
+            ->assertSee('A-001')
+            ->assertSee('Budi Santoso');
+    }
+
+    public function test_pasien_lama_dengan_nomor_rm_bisa_masuk_lewat_login(): void
     {
         $pasien = Pasien::create([
             'ID_Pasien' => 'PSN-01',
-            'No_RM' => 'RM-000123',
+            'No_RM' => 'RM-2026-0001',
             'Nama_Lengkap' => 'Lina Marlina',
             'Tgl_Lahir' => '1985-02-20',
             'Alamat' => 'Menganti',
             'Jenis_Pasien' => Pasien::JENIS_UMUM,
         ]);
 
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'lama',
-            'No_RM' => 'RM-000123',
-        ])->assertRedirect(route('pendaftaran.status', 'A-001'));
+        $this->post(route('pasien.login.proses'), [
+            'No_RM' => 'RM-2026-0001',
+            'Tgl_Lahir' => '1985-02-20',
+        ])->assertRedirect(route('pasien.dashboard'));
+
+        $this->assertAuthenticatedAs($pasien, 'pasien');
+
+        $this->post(route('pasien.daftar.simpan'), ['ID_Jadwal' => 'JDW-01'])
+            ->assertRedirect(route('pendaftaran.status', 'A-001'));
 
         $this->assertDatabaseHas('ANTREAN', [
             'ID_Pasien' => $pasien->ID_Pasien,
@@ -97,53 +111,5 @@ class PendaftaranTest extends TestCase
         ]);
 
         $this->assertSame(1, Pasien::count());
-    }
-
-    public function test_no_rm_tidak_valid_ditolak(): void
-    {
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'lama',
-            'No_RM' => 'RM-TIDAK-ADA',
-        ])->assertSessionHasErrors('No_RM');
-
-        $this->assertDatabaseCount('ANTREAN', 0);
-    }
-
-    public function test_kuota_habis_ditolak(): void
-    {
-        Jadwal::where('ID_Jadwal', 'JDW-01')->update(['Sisa_Kuota' => 1]);
-
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
-            'Nama_Lengkap' => 'Pasien Pertama',
-            'Tgl_Lahir' => '1992-03-03',
-        ])->assertSessionHasNoErrors();
-
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
-            'Nama_Lengkap' => 'Pasien Kedua',
-            'Tgl_Lahir' => '1993-04-04',
-        ])->assertSessionHasErrors('ID_Jadwal');
-
-        $this->assertDatabaseCount('ANTREAN', 1);
-        $this->assertSame(0, Jadwal::find('JDW-01')->Sisa_Kuota);
-    }
-
-    public function test_halaman_status_menampilkan_nomor_antrean(): void
-    {
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
-            'Nama_Lengkap' => 'Budi Santoso',
-            'Tgl_Lahir' => '1990-05-12',
-        ])->assertSessionHasNoErrors();
-
-        $this->get('/status/A-001')
-            ->assertOk()
-            ->assertSee('A-001')
-            ->assertSee('Budi Santoso');
     }
 }

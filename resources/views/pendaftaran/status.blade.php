@@ -63,7 +63,7 @@
                         <dd class="col-7 col-sm-8 fw-semibold">{{ $antrean->pasien->Nama_Lengkap }}</dd>
 
                         <dt class="col-5 col-sm-4 text-muted fw-normal">No RM</dt>
-                        <dd class="col-7 col-sm-8">{{ $antrean->pasien->No_RM ?? 'Belum terbit (pasien baru)' }}</dd>
+                        <dd class="col-7 col-sm-8">{{ $antrean->pasien->No_RM ?? '-' }}</dd>
 
                         <dt class="col-5 col-sm-4 text-muted fw-normal">Poli</dt>
                         <dd class="col-7 col-sm-8">{{ $antrean->jadwal->poli->Nama_Poli }}</dd>
@@ -106,8 +106,8 @@
                 <div>
                     <h2 class="h6 mb-1">Saat tiba di klinik</h2>
                     <p class="text-muted small mb-0">
-                        Tunjukkan halaman ini (nomor antrean, nama, dan tanggal lahir) kepada petugas.
-                        Petugas akan memverifikasi data Anda, lalu kartu antrian dicetak.
+                        Tunjukkan halaman ini (nomor antrean, nama, dan nomor RM) kepada petugas.
+                        Petugas akan memverifikasi No RM Anda, lalu kartu antrian dicetak.
                     </p>
                 </div>
             </div>

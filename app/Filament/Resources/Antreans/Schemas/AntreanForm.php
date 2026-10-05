@@ -52,6 +52,11 @@ class AntreanForm
                     ->label('Tanggal Lahir')
                     ->maxDate(today())
                     ->required(),
+                TextInput::make('No_Telepon')
+                    ->label('Nomor HP')
+                    ->tel()
+                    ->maxLength(25)
+                    ->helperText('Opsional. Dipakai pasien untuk login ke akunnya (bersama No RM).'),
                 Textarea::make('Alamat')
                     ->label('Alamat')
                     ->columnSpanFull(),

@@ -17,7 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureRole::class,
         ]);
 
-        $middleware->redirectGuestsTo(fn () => url('/panel/login'));
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('pasien') || $request->is('pasien/*')
+            ? route('pasien.login')
+            : url('/panel/login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

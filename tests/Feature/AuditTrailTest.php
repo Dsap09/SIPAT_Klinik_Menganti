@@ -36,14 +36,9 @@ class AuditTrailTest extends TestCase
         return Antrean::where('No_Antrean', $noAntrean)->firstOrFail();
     }
 
-    public function test_pendaftaran_online_mencatat_audit_pasien_tanpa_pengguna(): void
+    public function test_registrasi_akun_mencatat_audit_pasien_tanpa_pengguna(): void
     {
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
-            'Nama_Lengkap' => 'Budi Santoso',
-            'Tgl_Lahir' => '1990-05-12',
-        ])->assertSessionHasNoErrors();
+        $this->registrasiAkun(['Nama_Lengkap' => 'Budi Santoso']);
 
         $this->assertDatabaseHas('AUDIT_TRAIL', [
             'Entitas_Terdampak' => 'Pasien',
@@ -51,6 +46,11 @@ class AuditTrailTest extends TestCase
         ]);
 
         $this->assertSame(1, AuditTrail::where('Entitas_Terdampak', 'Pasien')->count());
+
+        $this->assertDatabaseHas('AUDIT_TRAIL', [
+            'Entitas_Terdampak' => 'Akun',
+            'ID_Pengguna' => null,
+        ]);
     }
 
     public function test_input_bpjs_mencatat_audit_dengan_id_pengguna(): void
@@ -99,18 +99,13 @@ class AuditTrailTest extends TestCase
     {
         $petugas = $this->petugas();
 
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
-            'Nama_Lengkap' => 'Budi Santoso',
-            'Tgl_Lahir' => '1990-05-12',
-        ])->assertSessionHasNoErrors();
+        $this->daftarkanAntrean($this->buatPasien(['Nama_Lengkap' => 'Budi Santoso']));
 
         $this->actingAs($petugas);
 
         Livewire::test(ListAntreans::class)
             ->callTableAction('checkin', $this->antrean('A-001'), [
-                'tanggal_lahir' => '1990-05-12',
+                'no_rm' => $this->antrean('A-001')->pasien->No_RM,
             ])
             ->assertHasNoTableActionErrors();
 
@@ -119,5 +114,7 @@ class AuditTrailTest extends TestCase
             'ID_Pengguna' => $petugas->ID_Pengguna,
             'Deskripsi_Aksi' => 'Check-in pasien A-001 (Budi Santoso)',
         ]);
+
+        $this->assertSame(Antrean::STATUS_MENUNGGU, $this->antrean('A-001')->Status);
     }
 }

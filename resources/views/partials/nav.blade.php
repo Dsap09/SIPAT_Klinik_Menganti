@@ -19,13 +19,34 @@
                 <li class="nav-item"><a class="nav-link" href="{{ route('beranda') }}#jadwal">Jadwal</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('beranda') }}#faq">FAQ</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('beranda') }}#kontak">Kontak</a></li>
-                <li class="nav-item ms-lg-2">
-                    <a class="btn btn-sm btn-outline-primary" href="{{ url('/panel') }}">
+
+                @auth('pasien')
+                    <li class="nav-item ms-lg-2">
+                        <a class="nav-link" href="{{ route('pasien.dashboard') }}">
+                            <x-si-icon name="user" class="sipat-icon-sm" /> {{ auth('pasien')->user()->Nama_Lengkap }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="POST" action="{{ route('pasien.logout') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Keluar</button>
+                        </form>
+                    </li>
+                @else
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-sm btn-outline-primary" href="{{ route('pasien.login') }}">
+                            <x-si-icon name="lock" class="sipat-icon-sm" /> Masuk Pasien
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-primary" href="{{ route('pendaftaran.form') }}">Daftar Antrean</a>
+                    </li>
+                @endauth
+
+                <li class="nav-item">
+                    <a class="btn btn-sm btn-outline-secondary" href="{{ url('/panel') }}">
                         <x-si-icon name="lock" class="sipat-icon-sm" /> Masuk Petugas
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-sm btn-primary" href="{{ route('pendaftaran.form') }}">Daftar Antrean</a>
                 </li>
             </ul>
         </div>

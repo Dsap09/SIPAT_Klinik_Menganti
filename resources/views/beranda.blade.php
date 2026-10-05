@@ -58,9 +58,9 @@
         <div class="row g-3">
             @foreach ([
                 ['judul' => 'Pilih poli & jadwal', 'teks' => 'Tentukan poli, dokter, dan jam layanan yang masih memiliki kuota.'],
-                ['judul' => 'Isi data pasien', 'teks' => 'Pasien baru mengisi nama, tanggal lahir, dan alamat. Pasien lama cukup memasukkan No RM.'],
+                ['judul' => 'Daftar akun pasien', 'teks' => 'Pasien baru mendaftar sekali dan langsung mendapat nomor RM. Pasien lama masuk dengan 2 dari 3 data.'],
                 ['judul' => 'Dapat nomor antrean', 'teks' => 'Sistem menerbitkan nomor antrean beserta estimasi jam datang Anda.'],
-                ['judul' => 'Check-in di klinik', 'teks' => 'Petugas mencocokkan nama dan tanggal lahir, lalu kartu antrian dicetak.'],
+                ['judul' => 'Check-in di klinik', 'teks' => 'Petugas mencocokkan nomor RM, lalu kartu antrian dicetak.'],
             ] as $langkah)
                 <div class="col-md-6 col-xl-3">
                     <div class="step-card card-hover">
@@ -152,7 +152,7 @@
                         <ol class="small text-muted mb-0 ps-3">
                             <li>Daftar melalui aplikasi <strong>Mobile JKN</strong> dan dapatkan nomor dari BPJS.</li>
                             <li>Petugas memasukkan data tersebut ke SIPAT pada hari kunjungan.</li>
-                            <li>Check-in di loket dengan menunjukkan nomor antrean, nama, dan tanggal lahir.</li>
+                            <li>Check-in di loket dengan menunjukkan nomor antrean, nama, dan nomor RM.</li>
                             <li>Kartu antrian dicetak dan Anda menunggu dipanggil.</li>
                         </ol>
                     </div>
@@ -164,8 +164,8 @@
                     <div>
                         <h3 class="h6 mb-1">Pasien umum</h3>
                         <ol class="small text-muted mb-0 ps-3">
-                            <li>Daftar online dari rumah melalui halaman ini.</li>
-                            <li>Pasien baru mengisi data diri; pasien lama cukup memasukkan No RM.</li>
+                            <li>Daftar online dari rumah melalui akun pasien.</li>
+                            <li>Pasien baru mendaftar akun (No RM terbit otomatis); pasien lama masuk dengan 2 dari 3 data.</li>
                             <li>Datang mendekati estimasi jam yang tertera, lalu check-in di loket.</li>
                             <li>Belum sempat daftar online? Datang langsung dan petugas akan membantu.</li>
                         </ol>

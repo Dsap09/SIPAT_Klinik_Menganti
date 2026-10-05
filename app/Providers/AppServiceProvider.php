@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Carbon::setLocale(config('app.locale'));
 
+        Paginator::useBootstrapFive();
+
         RateLimiter::for('pendaftaran', fn (Request $request) => Limit::perMinute(
             (int) config('sipat.throttle.pendaftaran')
         )->by($request->ip()));
@@ -32,5 +35,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('status-antrean', fn (Request $request) => Limit::perMinute(
             (int) config('sipat.throttle.status')
         )->by($request->ip()));
+
+        RateLimiter::for('pasien-login', fn (Request $request) => Limit::perMinute(
+            (int) config('sipat.throttle.login')
+        )->by($request->ip().'|'.$request->input('No_RM').'|'.$request->input('No_Telepon')));
     }
 }

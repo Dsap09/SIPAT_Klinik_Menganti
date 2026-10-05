@@ -23,8 +23,8 @@
     </x-filament::section>
 
     <x-filament::section heading="2. Melayani pasien di loket (Petugas)" collapsible collapsed>
-        <p><strong>a. Input pasien BPJS atau walk-in.</strong> Buka <strong>Loket &rarr; Antrean</strong>, klik <strong>Input Pasien (BPJS / Walk-in)</strong>. Pilih jadwal, pilih jenis pasien (BPJS wajib mengisi nomor BPJS), isi nama dan tanggal lahir, lalu <strong>Create</strong>. Sistem memberi nomor antrean terpadu (mis. <code>A-001</code>) dan langsung membuka kartu antrian untuk dicetak.</p>
-        <p><strong>b. Check-in dan verifikasi.</strong> Pada baris antrean klik <strong>Check-in</strong>, masukkan <strong>tanggal lahir</strong> pasien. Jika cocok, check-in tersimpan dan kartu antrian otomatis terbuka untuk dicetak. Jika tidak cocok, check-in ditolak.</p>
+        <p><strong>a. Input pasien BPJS atau walk-in.</strong> Buka <strong>Loket &rarr; Antrean</strong>, klik <strong>Input Pasien (BPJS / Walk-in)</strong>. Pilih jadwal, pilih jenis pasien (BPJS wajib mengisi nomor BPJS), isi nama dan tanggal lahir, lalu <strong>Create</strong>. Sistem menerbitkan <strong>nomor RM otomatis</strong> (mis. <code>RM-2026-0001</code>), memberi nomor antrean terpadu (mis. <code>A-001</code>), dan langsung membuka kartu antrian untuk dicetak. Kolom nomor HP bersifat opsional — bila diisi, pasien dapat memakai akun online-nya.</p>
+        <p><strong>b. Check-in dan verifikasi.</strong> Pada baris antrean klik <strong>Check-in</strong>, masukkan <strong>nomor RM</strong> pasien (tertera pada kartu/riwayat kunjungan). Jika cocok, check-in tersimpan dan kartu antrian otomatis terbuka untuk dicetak. Jika tidak cocok, check-in ditolak.</p>
         <p><strong>c. Mengubah status.</strong> Klik <strong>Ubah Status</strong>: <em>Menunggu</em> &rarr; <em>Dilayani</em> &rarr; <em>Selesai</em>, atau <em>Batal</em> bila pasien tidak hadir.</p>
         <p><strong>d. Cetak ulang kartu.</strong> Klik tombol <strong>Kartu</strong> pada antrean yang sudah check-in.</p>
         <p>Daftar antrean hanya menampilkan <strong>antrean hari ini</strong>. Gunakan filter <em>Status</em> untuk menyaring.</p>
@@ -35,9 +35,11 @@
         <p>Angka di dashboard bersumber dari basis data yang sama dengan daftar antrean.</p>
     </x-filament::section>
 
-    <x-filament::section heading="4. Sisi pasien (online)" collapsible collapsed>
-        <p>Pasien umum mendaftar sendiri di halaman <strong>/daftar</strong>: pasien baru mengisi data diri, pasien lama memasukkan No RM. Setelah mendaftar, pasien menerima nomor antrean dan estimasi waktu kedatangan.</p>
-        <p>Di halaman <strong>/status/{nomor}</strong>, pasien melihat status terbaru (diperbarui otomatis tiap 30 detik), dapat <strong>membatalkan</strong> atau <strong>menjadwalkan ulang</strong> selama belum check-in. Kuota yang ditinggalkan otomatis dikembalikan.</p>
+    <x-filament::section heading="4. Sisi pasien (akun online)" collapsible collapsed>
+        <p>Pendaftaran antrean online kini memakai <strong>akun pasien</strong>. Halaman <strong>/daftar</strong> menjadi gerbang akun: pasien baru mendaftar di <strong>/pasien/register</strong> (langsung menerima <strong>nomor RM otomatis</strong>), pasien lama masuk di <strong>/pasien/login</strong> dengan verifikasi <strong>2 dari 3 data</strong>: No RM, nomor HP, atau tanggal lahir.</p>
+        <p>Setelah masuk, pasien dapat <strong>mendaftar berobat</strong> (pilih poli/jadwal) tanpa mengisi data ulang, melihat <strong>riwayat antrean</strong> dan status antrean aktif (diperbarui otomatis tiap 30 detik), serta memperbarui <strong>profil</strong> (nomor HP, alamat, data sosial). Data identitas (NIK, nama, tanggal lahir) hanya dapat diubah oleh petugas.</p>
+        <p>Antrean <strong>BPJS</strong> tetap diambil lewat Mobile JKN dan dikonfirmasi petugas di loket; halaman online pasien BPJS hanya untuk memantau riwayat.</p>
+        <p>Di halaman <strong>/status/{nomor}</strong> (tanpa login), siapa pun yang memegang nomor antrean dapat melihat status terbaru, <strong>membatalkan</strong>, atau <strong>menjadwalkan ulang</strong> selama belum check-in. Kuota yang ditinggalkan otomatis dikembalikan.</p>
     </x-filament::section>
 
     <x-filament::section heading="Hal yang sering ditanyakan" collapsible collapsed>

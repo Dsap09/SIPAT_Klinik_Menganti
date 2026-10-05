@@ -4,14 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Antrean;
 use App\Models\Jadwal;
-use App\Models\Pasien;
 use App\Models\Poli;
 use App\Services\AuditLogger;
 use App\Services\QueueService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use RuntimeException;
@@ -27,7 +25,7 @@ class PendaftaranController extends Controller
     {
         return view('beranda', [
             'poli' => Poli::query()->withCount('dokter')->orderBy('Nama_Poli')->get(),
-            'jadwal' => $this->jadwalTersedia(),
+            'jadwal' => Jadwal::tersediaUrutHari(),
         ]);
     }
 
@@ -44,49 +42,13 @@ class PendaftaranController extends Controller
         return redirect()->route('pendaftaran.status', $nomor);
     }
 
-    public function form(): View
+    public function form(): View|RedirectResponse
     {
-        return view('pendaftaran.form', ['jadwal' => $this->jadwalTersedia()]);
-    }
-
-    public function simpan(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'ID_Jadwal' => ['required', 'string', 'exists:JADWAL,ID_Jadwal'],
-            'jenis' => ['required', 'in:baru,lama'],
-            'Nama_Lengkap' => ['required_if:jenis,baru', 'nullable', 'string', 'max:255'],
-            'Tgl_Lahir' => ['required_if:jenis,baru', 'nullable', 'date', 'before:today'],
-            'Alamat' => ['nullable', 'string', 'max:500'],
-            'No_RM' => ['required_if:jenis,lama', 'nullable', 'string', 'max:50'],
-        ]);
-
-        $jadwal = Jadwal::findOrFail($data['ID_Jadwal']);
-
-        if ($data['jenis'] === 'lama') {
-            $pasien = Pasien::where('No_RM', $data['No_RM'])->first();
-
-            if (! $pasien) {
-                throw ValidationException::withMessages([
-                    'No_RM' => 'No RM tidak ditemukan. Periksa kembali atau daftar sebagai pasien baru.',
-                ]);
-            }
-        } else {
-            $pasien = new Pasien([
-                'ID_Pasien' => (string) Str::uuid(),
-                'Nama_Lengkap' => $data['Nama_Lengkap'],
-                'Tgl_Lahir' => $data['Tgl_Lahir'],
-                'Alamat' => $data['Alamat'] ?? null,
-                'Jenis_Pasien' => Pasien::JENIS_UMUM,
-            ]);
+        if (auth('pasien')->check()) {
+            return redirect()->route('pasien.daftar');
         }
 
-        try {
-            $antrean = $this->queue->daftar($jadwal, $pasien);
-        } catch (RuntimeException $e) {
-            throw ValidationException::withMessages(['ID_Jadwal' => $e->getMessage()]);
-        }
-
-        return redirect()->route('pendaftaran.status', $antrean->No_Antrean);
+        return view('pendaftaran.gerbang');
     }
 
     public function status(string $noAntrean): View
@@ -137,7 +99,7 @@ class PendaftaranController extends Controller
 
         return view('pendaftaran.jadwal-ulang', [
             'antrean' => $antrean,
-            'jadwal' => $this->jadwalTersedia(),
+            'jadwal' => Jadwal::tersediaUrutHari(),
         ]);
     }
 
@@ -162,18 +124,6 @@ class PendaftaranController extends Controller
         return redirect()
             ->route('pendaftaran.status', $antreanBaru->No_Antrean)
             ->with('sukses', "Pendaftaran dijadwalkan ulang. Nomor antrean baru: {$antreanBaru->No_Antrean}.");
-    }
-
-    private function jadwalTersedia()
-    {
-        $urutan = array_flip(Jadwal::URUTAN_HARI);
-
-        return Jadwal::query()
-            ->with(['poli', 'dokter'])
-            ->where('Sisa_Kuota', '>', 0)
-            ->get()
-            ->sortBy(fn (Jadwal $item) => $urutan[$item->Hari_Layanan] ?? 99)
-            ->values();
     }
 
     private function cariAntrean(string $noAntrean): Antrean

@@ -26,12 +26,9 @@ class AuditAntreanTest extends TestCase
 
     private function daftarUmum(int $nomor): void
     {
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
-            'Nama_Lengkap' => "Pasien Umum {$nomor}",
-            'Tgl_Lahir' => '1990-01-01',
-        ])->assertSessionHasNoErrors();
+        $pasien = $this->buatPasien(['Nama_Lengkap' => "Pasien Umum {$nomor}"]);
+
+        $this->daftarkanAntrean($pasien);
     }
 
     private function inputBpjs(int $nomor): void
@@ -94,18 +91,22 @@ class AuditAntreanTest extends TestCase
         $this->assertSame(1, Antrean::where('Status', Antrean::STATUS_MENUNGGU)->count());
     }
 
-    public function test_pendaftaran_dibatasi_setelah_batas_per_menit(): void
+    public function test_registrasi_akun_dibatasi_setelah_batas_per_menit(): void
     {
         config()->set('sipat.throttle.pendaftaran', 2);
 
-        $this->daftarUmum(1);
-        $this->daftarUmum(2);
+        $this->registrasiAkun(['Nama_Lengkap' => 'Pasien Umum 1', 'No_Telepon' => '081200000001']);
+        $this->registrasiAkun(['Nama_Lengkap' => 'Pasien Umum 2', 'No_Telepon' => '081200000002']);
 
-        $this->post('/daftar', [
-            'ID_Jadwal' => 'JDW-01',
-            'jenis' => 'baru',
+        $this->post(route('pasien.register.simpan'), [
             'Nama_Lengkap' => 'Pasien Umum 3',
+            'Tempat_Lahir' => 'Gresik',
             'Tgl_Lahir' => '1990-01-01',
+            'Jenis_Kelamin' => 'Laki-laki',
+            'NIK' => '3525123456780003',
+            'Alamat' => 'Jl. Raya Menganti',
+            'No_Telepon' => '081200000003',
+            'Jenis_Pasien' => 'UMUM',
         ])->assertStatus(429);
     }
 }
