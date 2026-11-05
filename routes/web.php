@@ -7,30 +7,31 @@ use App\Http\Controllers\Pasien\PendaftaranPasienController;
 use App\Http\Controllers\PendaftaranController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [PendaftaranController::class, 'beranda'])->name('beranda');
-Route::get('/cek', [PendaftaranController::class, 'cekStatus'])->name('pendaftaran.cek');
-Route::get('/daftar', [PendaftaranController::class, 'form'])->name('pendaftaran.form');
+Route::middleware('mode:pasien')->group(function () {
+    Route::get('/', [PendaftaranController::class, 'beranda'])->name('beranda');
+    Route::get('/cek', [PendaftaranController::class, 'cekStatus'])->name('pendaftaran.cek');
+    Route::get('/daftar', [PendaftaranController::class, 'form'])->name('pendaftaran.form');
 
-Route::get('/status/{noAntrean}', [PendaftaranController::class, 'status'])->name('pendaftaran.status');
-Route::get('/status/{noAntrean}/data', [PendaftaranController::class, 'statusData'])
-    ->middleware('throttle:status-antrean')
-    ->name('pendaftaran.status.data');
-Route::post('/status/{noAntrean}/batal', [PendaftaranController::class, 'batal'])->name('pendaftaran.batal');
-Route::get('/status/{noAntrean}/jadwal-ulang', [PendaftaranController::class, 'formJadwalUlang'])->name('pendaftaran.jadwalUlang.form');
-Route::post('/status/{noAntrean}/jadwal-ulang', [PendaftaranController::class, 'jadwalUlang'])->name('pendaftaran.jadwalUlang.simpan');
+    Route::get('/status/{noAntrean}', [PendaftaranController::class, 'status'])->name('pendaftaran.status');
+    Route::get('/status/{noAntrean}/data', [PendaftaranController::class, 'statusData'])
+        ->middleware('throttle:status-antrean')
+        ->name('pendaftaran.status.data');
+});
 
 Route::prefix('pasien')->name('pasien.')->group(function () {
-    Route::get('/register', [AkunPasienController::class, 'formRegister'])->name('register');
-    Route::post('/register', [AkunPasienController::class, 'simpanRegister'])
-        ->middleware('throttle:pendaftaran')
-        ->name('register.simpan');
+    Route::middleware('mode:pasien')->group(function () {
+        Route::get('/register', [AkunPasienController::class, 'formRegister'])->name('register');
+        Route::post('/register', [AkunPasienController::class, 'simpanRegister'])
+            ->middleware('throttle:pendaftaran')
+            ->name('register.simpan');
 
-    Route::get('/login', [AkunPasienController::class, 'formLogin'])->name('login');
-    Route::post('/login', [AkunPasienController::class, 'masuk'])
-        ->middleware('throttle:pasien-login')
-        ->name('login.proses');
+        Route::get('/login', [AkunPasienController::class, 'formLogin'])->name('login');
+        Route::post('/login', [AkunPasienController::class, 'masuk'])
+            ->middleware('throttle:pasien-login')
+            ->name('login.proses');
+    });
 
-    Route::middleware('auth:pasien')->group(function () {
+    Route::middleware(['mode:pasien', 'auth:pasien'])->group(function () {
         Route::post('/logout', [AkunPasienController::class, 'keluar'])->name('logout');
 
         Route::get('/dashboard', [DashboardPasienController::class, 'dashboard'])->name('dashboard');
@@ -43,6 +44,12 @@ Route::prefix('pasien')->name('pasien.')->group(function () {
     });
 });
 
+Route::prefix('pasien')->middleware(['mode:pasien', 'auth:pasien'])->group(function () {
+    Route::post('/antrean/{noAntrean}/batal', [PendaftaranController::class, 'batal'])->name('pendaftaran.batal');
+    Route::get('/antrean/{noAntrean}/jadwal-ulang', [PendaftaranController::class, 'formJadwalUlang'])->name('pendaftaran.jadwalUlang.form');
+    Route::post('/antrean/{noAntrean}/jadwal-ulang', [PendaftaranController::class, 'jadwalUlang'])->name('pendaftaran.jadwalUlang.simpan');
+});
+
 Route::get('/kartu/{noAntrean}', [KartuAntrianController::class, 'show'])
-    ->middleware(['auth', 'role:Petugas,Admin'])
+    ->middleware(['mode:staf', 'auth', 'role:Petugas,Admin'])
     ->name('kartu');

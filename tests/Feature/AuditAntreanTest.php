@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Resources\Antreans\Pages\CreateAntrean;
 use App\Models\Antrean;
 use App\Models\Jadwal;
+use App\Models\Pasien;
 use App\Models\Pengguna;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,11 +25,13 @@ class AuditAntreanTest extends TestCase
         Filament::setCurrentPanel(Filament::getPanel('panel'));
     }
 
-    private function daftarUmum(int $nomor): void
+    private function daftarUmum(int $nomor): Pasien
     {
         $pasien = $this->buatPasien(['Nama_Lengkap' => "Pasien Umum {$nomor}"]);
 
         $this->daftarkanAntrean($pasien);
+
+        return $pasien;
     }
 
     private function inputBpjs(int $nomor): void
@@ -75,15 +78,18 @@ class AuditAntreanTest extends TestCase
 
     public function test_kuota_konsisten_setelah_batal_dan_jadwal_ulang(): void
     {
-        $this->daftarUmum(1);
-        $this->daftarUmum(2);
+        $pasienSatu = $this->daftarUmum(1);
+        $pasienDua = $this->daftarUmum(2);
 
         $this->assertSame(18, Jadwal::find('JDW-01')->Sisa_Kuota);
 
-        $this->post(route('pendaftaran.batal', 'A-001'))->assertSessionHas('sukses');
+        $this->actingAs($pasienSatu, 'pasien')
+            ->post(route('pendaftaran.batal', 'A-001'))
+            ->assertSessionHas('sukses');
         $this->assertSame(19, Jadwal::find('JDW-01')->Sisa_Kuota);
 
-        $this->post(route('pendaftaran.jadwalUlang.simpan', 'A-002'), ['ID_Jadwal' => 'JDW-02'])
+        $this->actingAs($pasienDua, 'pasien')
+            ->post(route('pendaftaran.jadwalUlang.simpan', 'A-002'), ['ID_Jadwal' => 'JDW-02'])
             ->assertSessionHas('sukses');
 
         $this->assertSame(20, Jadwal::find('JDW-01')->Sisa_Kuota);

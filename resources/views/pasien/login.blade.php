@@ -39,7 +39,7 @@
                             @enderror
                         </div>
 
-                        <p class="text-muted small text-center mb-3">— atau —</p>
+                        <p class="text-muted small text-center mb-3">- atau -</p>
 
                         <div class="mb-3">
                             <label for="No_Telepon" class="form-label">Nomor HP</label>
@@ -75,7 +75,7 @@
                         Masuk dengan nomor HP dan tanggal lahir yang terdaftar. Nomor RM Anda akan tampil di dashboard.
                     </p>
                     <p class="text-muted small mb-0">
-                        Belum punya akun? <a href="{{ route('pasien.register') }}">Daftar akun baru</a> —
+                        Belum punya akun? <a href="{{ route('pasien.register') }}">Daftar akun baru</a> -
                         nomor RM diterbitkan otomatis.
                     </p>
                 </div>

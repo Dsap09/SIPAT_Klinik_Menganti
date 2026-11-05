@@ -50,7 +50,7 @@
                         <div>
                             <p class="queue-number mb-1">{{ $antrean->No_Antrean }}</p>
                             <p class="mb-0 small text-muted">
-                                {{ $antrean->jadwal->poli->Nama_Poli }} — {{ $antrean->jadwal->dokter->Nama_Dokter }}
+                                {{ $antrean->jadwal->poli->Nama_Poli }} - {{ $antrean->jadwal->dokter->Nama_Dokter }}
                             </p>
                         </div>
                         <div class="text-end">

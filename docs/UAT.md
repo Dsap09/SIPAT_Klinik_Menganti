@@ -1,4 +1,4 @@
-# Panduan Pengujian & UAT — SIPAT Klinik Menganti
+# Panduan Pengujian & UAT - SIPAT Klinik Menganti
 
 Checklist Black Box + User Acceptance Testing (minggu 13-14). Diturunkan dari `Product_Backlog_Kelompok4.xlsx` dan indikator keberhasilan pada `Laporan_Proyek_SIPAT_Klinik_Menganti.docx`.
 
@@ -7,9 +7,9 @@ Checklist Black Box + User Acceptance Testing (minggu 13-14). Diturunkan dari `P
 1. `php artisan migrate:fresh --seed` untuk menyiapkan basis data uji.
 2. `npm run build` lalu `php artisan serve`.
 3. (Opsional) `php artisan schedule:work` untuk menguji backup otomatis harian.
-4. `php artisan test` — menjalankan seluruh pengujian otomatis (Black Box fungsional).
+4. `php artisan test` - menjalankan seluruh pengujian otomatis (Black Box fungsional).
 
-Akun uji: `admin`, `petugas`, `manajemen`, `dokter` — password `password`.
+Akun uji: `admin`, `petugas`, `manajemen`, `dokter` - password `password`.
 
 ## A. Akun Pasien & Pendaftaran Berobat
 

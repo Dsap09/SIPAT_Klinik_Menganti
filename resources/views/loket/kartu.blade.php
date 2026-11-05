@@ -19,7 +19,7 @@
 
                     <p class="mb-0 fw-semibold fs-5">{{ $antrean->pasien->Nama_Lengkap }}</p>
                     <p class="text-muted small mb-4">
-                        {{ $antrean->pasien->Jenis_Pasien }} — {{ $antrean->jadwal->poli->Nama_Poli }}
+                        {{ $antrean->pasien->Jenis_Pasien }} - {{ $antrean->jadwal->poli->Nama_Poli }}
                     </p>
 
                     <dl class="row mb-0 text-start small">

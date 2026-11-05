@@ -30,7 +30,7 @@
                 <div class="small">
                     <div class="fw-semibold">Antrean saat ini</div>
                     <div class="text-muted">
-                        {{ $antrean->jadwal->poli->Nama_Poli }} — {{ $antrean->jadwal->dokter->Nama_Dokter }}<br>
+                        {{ $antrean->jadwal->poli->Nama_Poli }} - {{ $antrean->jadwal->dokter->Nama_Dokter }}<br>
                         {{ $antrean->jadwal->Hari_Layanan }},
                         {{ substr($antrean->jadwal->Jam_Mulai, 0, 5) }}–{{ substr($antrean->jadwal->Jam_Selesai, 0, 5) }}
                         · status {{ $antrean->Status }}
@@ -53,7 +53,7 @@
                                 <span class="jadwal-hari">{{ $item->Hari_Layanan }}</span>
                                 <div class="flex-grow-1">
                                     <div class="fw-semibold">
-                                        {{ $item->poli->Nama_Poli }} — {{ $item->dokter->Nama_Dokter }}
+                                        {{ $item->poli->Nama_Poli }} - {{ $item->dokter->Nama_Dokter }}
                                     </div>
                                     <div class="text-muted small">
                                         {{ substr($item->Jam_Mulai, 0, 5) }}–{{ substr($item->Jam_Selesai, 0, 5) }}
