@@ -78,7 +78,7 @@
                                 <label for="Jenis_Kelamin" class="form-label">Jenis Kelamin</label>
                                 <select name="Jenis_Kelamin" id="Jenis_Kelamin"
                                         class="form-select @error('Jenis_Kelamin') is-invalid @enderror" required>
-                                    <option value="">— Pilih —</option>
+                                    <option value="">- Pilih -</option>
                                     @foreach (\App\Models\Pasien::JENIS_KELAMIN as $jenisKelamin)
                                         <option value="{{ $jenisKelamin }}" @selected(old('Jenis_Kelamin') === $jenisKelamin)>
                                             {{ $jenisKelamin }}
@@ -171,7 +171,7 @@
                             <div class="col-md-6">
                                 <label for="Status_Pernikahan" class="form-label">Status Pernikahan</label>
                                 <select name="Status_Pernikahan" id="Status_Pernikahan" class="form-select">
-                                    <option value="">— Pilih —</option>
+                                    <option value="">- Pilih -</option>
                                     @foreach (['Belum menikah', 'Menikah', 'Cerai hidup', 'Cerai mati'] as $status)
                                         <option value="{{ $status }}" @selected(old('Status_Pernikahan') === $status)>{{ $status }}</option>
                                     @endforeach

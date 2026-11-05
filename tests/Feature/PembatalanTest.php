@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Antrean;
 use App\Models\Jadwal;
+use App\Models\Pasien;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,11 +19,13 @@ class PembatalanTest extends TestCase
         $this->seed();
     }
 
-    private function daftarUmum(string $jadwal = 'JDW-01', string $nama = 'Budi Santoso'): void
+    private function daftarUmum(string $jadwal = 'JDW-01', string $nama = 'Budi Santoso'): Pasien
     {
         $pasien = $this->buatPasien(['Nama_Lengkap' => $nama]);
 
         $this->daftarkanAntrean($pasien, $jadwal);
+
+        return $pasien;
     }
 
     private function antrean(string $noAntrean): Antrean
@@ -30,13 +33,14 @@ class PembatalanTest extends TestCase
         return Antrean::where('No_Antrean', $noAntrean)->firstOrFail();
     }
 
-    public function test_pasien_bisa_membatalkan_dan_kuota_dikembalikan(): void
+    public function test_pasien_pemilik_bisa_membatalkan_dan_kuota_dikembalikan(): void
     {
-        $this->daftarUmum();
+        $pemilik = $this->daftarUmum();
 
         $this->assertSame(19, Jadwal::find('JDW-01')->Sisa_Kuota);
 
-        $this->post(route('pendaftaran.batal', 'A-001'))
+        $this->actingAs($pemilik, 'pasien')
+            ->post(route('pendaftaran.batal', 'A-001'))
             ->assertRedirect(route('pendaftaran.status', 'A-001'))
             ->assertSessionHas('sukses');
 
@@ -48,13 +52,43 @@ class PembatalanTest extends TestCase
         ]);
     }
 
-    public function test_antrean_yang_sudah_checkin_tidak_bisa_dibatalkan(): void
+    public function test_tamu_tidak_bisa_membatalkan_dan_diarahkan_ke_login_pasien(): void
     {
         $this->daftarUmum();
 
+        $this->post(route('pendaftaran.batal', 'A-001'))
+            ->assertRedirect(route('pasien.login'));
+
+        $this->assertSame(Antrean::STATUS_MENUNGGU, $this->antrean('A-001')->Status);
+        $this->assertSame(19, Jadwal::find('JDW-01')->Sisa_Kuota);
+    }
+
+    public function test_antrean_milik_pasien_lain_tidak_bisa_dibatalkan_atau_dijadwalkan_ulang(): void
+    {
+        $this->daftarUmum('JDW-01', 'Budi Santoso');
+        $penyusup = $this->daftarUmum('JDW-02', 'Siti Aminah');
+
+        $this->actingAs($penyusup, 'pasien')
+            ->post(route('pendaftaran.batal', 'A-001'))
+            ->assertForbidden();
+
+        $this->actingAs($penyusup, 'pasien')
+            ->get(route('pendaftaran.jadwalUlang.form', 'A-001'))
+            ->assertForbidden();
+
+        $this->assertSame(Antrean::STATUS_MENUNGGU, $this->antrean('A-001')->Status);
+        $this->assertSame(19, Jadwal::find('JDW-01')->Sisa_Kuota);
+    }
+
+    public function test_antrean_yang_sudah_checkin_tidak_bisa_dibatalkan(): void
+    {
+        $pemilik = $this->daftarUmum();
+
         $this->antrean('A-001')->update(['Waktu_CheckIn' => now()]);
 
-        $this->post(route('pendaftaran.batal', 'A-001'))->assertSessionHas('error');
+        $this->actingAs($pemilik, 'pasien')
+            ->post(route('pendaftaran.batal', 'A-001'))
+            ->assertSessionHas('error');
 
         $this->assertSame(Antrean::STATUS_MENUNGGU, $this->antrean('A-001')->Status);
         $this->assertSame(19, Jadwal::find('JDW-01')->Sisa_Kuota);
@@ -62,19 +96,25 @@ class PembatalanTest extends TestCase
 
     public function test_membatalkan_dua_kali_tidak_menggandakan_kuota(): void
     {
-        $this->daftarUmum();
+        $pemilik = $this->daftarUmum();
 
-        $this->post(route('pendaftaran.batal', 'A-001'))->assertSessionHas('sukses');
-        $this->post(route('pendaftaran.batal', 'A-001'))->assertSessionHas('error');
+        $this->actingAs($pemilik, 'pasien')
+            ->post(route('pendaftaran.batal', 'A-001'))
+            ->assertSessionHas('sukses');
+
+        $this->actingAs($pemilik, 'pasien')
+            ->post(route('pendaftaran.batal', 'A-001'))
+            ->assertSessionHas('error');
 
         $this->assertSame(20, Jadwal::find('JDW-01')->Sisa_Kuota);
     }
 
-    public function test_pasien_bisa_menjadwalkan_ulang_ke_jadwal_lain(): void
+    public function test_pasien_pemilik_bisa_menjadwalkan_ulang_ke_jadwal_lain(): void
     {
-        $this->daftarUmum('JDW-01');
+        $pemilik = $this->daftarUmum('JDW-01');
 
-        $this->post(route('pendaftaran.jadwalUlang.simpan', 'A-001'), ['ID_Jadwal' => 'JDW-02'])
+        $this->actingAs($pemilik, 'pasien')
+            ->post(route('pendaftaran.jadwalUlang.simpan', 'A-001'), ['ID_Jadwal' => 'JDW-02'])
             ->assertRedirect(route('pendaftaran.status', 'A-002'))
             ->assertSessionHas('sukses');
 
@@ -89,11 +129,12 @@ class PembatalanTest extends TestCase
         ]);
     }
 
-    public function test_form_jadwal_ulang_tampil_untuk_antrean_menunggu(): void
+    public function test_form_jadwal_ulang_tampil_untuk_pemilik_antrean_menunggu(): void
     {
-        $this->daftarUmum('JDW-01');
+        $pemilik = $this->daftarUmum('JDW-01');
 
-        $this->get(route('pendaftaran.jadwalUlang.form', 'A-001'))
+        $this->actingAs($pemilik, 'pasien')
+            ->get(route('pendaftaran.jadwalUlang.form', 'A-001'))
             ->assertOk()
             ->assertSee('Jadwalkan Ulang Pendaftaran')
             ->assertSee('A-001');
@@ -101,20 +142,23 @@ class PembatalanTest extends TestCase
 
     public function test_form_jadwal_ulang_ditolak_setelah_checkin(): void
     {
-        $this->daftarUmum();
+        $pemilik = $this->daftarUmum();
 
         $this->antrean('A-001')->update(['Waktu_CheckIn' => now()]);
 
-        $this->get(route('pendaftaran.jadwalUlang.form', 'A-001'))->assertForbidden();
+        $this->actingAs($pemilik, 'pasien')
+            ->get(route('pendaftaran.jadwalUlang.form', 'A-001'))
+            ->assertForbidden();
     }
 
     public function test_jadwal_ulang_gagal_jika_kuota_tujuan_habis(): void
     {
-        $this->daftarUmum('JDW-01');
+        $pemilik = $this->daftarUmum('JDW-01');
 
         Jadwal::where('ID_Jadwal', 'JDW-02')->update(['Sisa_Kuota' => 0]);
 
-        $this->post(route('pendaftaran.jadwalUlang.simpan', 'A-001'), ['ID_Jadwal' => 'JDW-02'])
+        $this->actingAs($pemilik, 'pasien')
+            ->post(route('pendaftaran.jadwalUlang.simpan', 'A-001'), ['ID_Jadwal' => 'JDW-02'])
             ->assertSessionHasErrors('ID_Jadwal');
 
         $this->assertSame(Antrean::STATUS_MENUNGGU, $this->antrean('A-001')->Status);

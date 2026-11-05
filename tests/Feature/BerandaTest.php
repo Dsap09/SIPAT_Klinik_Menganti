@@ -23,7 +23,9 @@ class BerandaTest extends TestCase
             ->assertOk()
             ->assertSee('Poli Umum')
             ->assertSee('Poli Gigi')
-            ->assertSee('Poli Anak');
+            ->assertSee('Poli Anak')
+            ->assertDontSee('Masuk Petugas')
+            ->assertDontSee('/panel');
     }
 
     public function test_beranda_menampilkan_jadwal_yang_masih_punya_kuota(): void

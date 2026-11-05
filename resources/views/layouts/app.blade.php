@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#0f766e">
-    <title>@yield('title', 'Beranda') — SIPAT {{ config('klinik.nama') }}</title>
+    <title>@yield('title', 'Beranda') - SIPAT {{ config('klinik.nama') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="d-flex flex-column min-vh-100">

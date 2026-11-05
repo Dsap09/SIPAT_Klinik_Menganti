@@ -1,4 +1,4 @@
-# Rencana Bridging BPJS PCare — SIPAT Klinik Menganti
+# Rencana Bridging BPJS PCare - SIPAT Klinik Menganti
 
 Status: **RENCANA / BELUM DIIMPLEMENTASIKAN**
 Disusun: 19 Oktober 2026
@@ -205,17 +205,17 @@ berbeda.
 
 | Field PCare | Field SIPAT | Catatan |
 |---|---|---|
-| `peserta.nama` | `PASIEN.Nama_Lengkap` | — |
+| `peserta.nama` | `PASIEN.Nama_Lengkap` | - |
 | `peserta.tglLahir` | `PASIEN.Tgl_Lahir` | format `Y-m-d` |
 | `peserta.noKartu` | `PASIEN.No_BPJS` | selalu string, jangan di-cast ke int |
-| `peserta.nik` | `PASIEN.NIK` | — |
+| `peserta.nik` | `PASIEN.NIK` | - |
 | `peserta.sex` (`L`/`P`) | `PASIEN.Jenis_Kelamin` | `Laki-laki` / `Perempuan` |
 | `peserta.mr.noTelepon` | `PASIEN.No_Telepon` | hanya jika kosong dan tidak bentrok |
 | `peserta.statusPeserta` | tampilan sementara | tidak disimpan |
 | `peserta.hakKelas` | tampilan sementara | tidak disimpan |
 | `peserta.jenisPeserta` | tampilan sementara | tidak disimpan |
 | `peserta.provUmum` | tampilan sementara | tidak disimpan |
-| — | `PASIEN.Jenis_Pasien = 'BPJS'` | — |
+| - | `PASIEN.Jenis_Pasien = 'BPJS'` | - |
 
 DTO dibuat toleran terhadap variasi respons:
 

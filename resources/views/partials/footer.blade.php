@@ -63,7 +63,7 @@
         <hr class="footer-rule">
 
         <div class="d-flex flex-wrap justify-content-between gap-2 small text-white-50">
-            <span>&copy; {{ now()->year }} {{ config('klinik.nama') }} — SIPAT</span>
+            <span>&copy; {{ now()->year }} {{ config('klinik.nama') }} - SIPAT</span>
             <span>Sistem Antrian Online Terpadu</span>
         </div>
     </div>

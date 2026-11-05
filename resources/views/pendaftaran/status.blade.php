@@ -87,18 +87,31 @@
             </div>
 
             @if ($antrean->bisaDibatalkan())
-                <div class="d-flex flex-wrap gap-2 mb-3 no-print" id="aksi-pendaftaran">
-                    <a href="{{ route('pendaftaran.jadwalUlang.form', $antrean->No_Antrean) }}" class="btn btn-outline-primary">
-                        <x-si-icon name="refresh" class="sipat-icon-sm" /> Jadwalkan Ulang
-                    </a>
-                    <form method="POST" action="{{ route('pendaftaran.batal', $antrean->No_Antrean) }}"
-                          onsubmit="return confirm('Batalkan pendaftaran ini? Kuota akan dikembalikan untuk pasien lain.');">
-                        @csrf
-                        <button type="submit" class="btn btn-outline-danger">
-                            <x-si-icon name="alert" class="sipat-icon-sm" /> Batalkan Pendaftaran
-                        </button>
-                    </form>
-                </div>
+                @if (auth('pasien')->check())
+                    <div class="d-flex flex-wrap gap-2 mb-3 no-print" id="aksi-pendaftaran">
+                        <a href="{{ route('pendaftaran.jadwalUlang.form', $antrean->No_Antrean) }}" class="btn btn-outline-primary">
+                            <x-si-icon name="refresh" class="sipat-icon-sm" /> Jadwalkan Ulang
+                        </a>
+                        <form method="POST" action="{{ route('pendaftaran.batal', $antrean->No_Antrean) }}"
+                              onsubmit="return confirm('Batalkan pendaftaran ini? Kuota akan dikembalikan untuk pasien lain.');">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-danger">
+                                <x-si-icon name="alert" class="sipat-icon-sm" /> Batalkan Pendaftaran
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <div class="info-tile mb-3 no-print" id="aksi-pendaftaran">
+                        <span class="icon-tile mb-0"><x-si-icon name="user" class="sipat-icon-lg" /></span>
+                        <div class="small">
+                            <div class="fw-semibold">Perlu ubah jadwal atau batalkan pendaftaran?</div>
+                            <div class="text-muted">
+                                <a href="{{ route('pasien.login') }}">Masuk dengan akun pasien</a>
+                                menggunakan 2 dari 3 data: No RM, No Telepon, dan tanggal lahir.
+                            </div>
+                        </div>
+                    </div>
+                @endif
             @endif
 
             <div class="info-tile">
@@ -128,6 +141,9 @@
             var diperbarui = document.getElementById('diperbarui-pada');
             var notifikasi = document.getElementById('notifikasi-status');
             var aksi = document.getElementById('aksi-pendaftaran');
+            var garisStatus = document.querySelector('.status-steps');
+            var langkahStatus = document.querySelectorAll('.status-step');
+            var urutanStatus = ['Menunggu', 'Dilayani', 'Selesai'];
             var warna = { Menunggu: 'warning', Dilayani: 'info', Selesai: 'success', Batal: 'secondary' };
             var statusTerakhir = badge.textContent.trim();
 
@@ -136,6 +152,7 @@
                 badge.className = 'badge text-bg-' + (warna[data.status] || 'secondary') + ' fs-6 px-3 py-2';
                 estimasi.textContent = data.estimasi_waktu || 'menyusul';
                 diperbarui.textContent = data.diperbarui_pada;
+                terapkanLangkah(data.status);
 
                 if (data.status !== statusTerakhir) {
                     statusTerakhir = data.status;
@@ -145,6 +162,32 @@
                     if (aksi) {
                         aksi.classList.add('d-none');
                     }
+                }
+            }
+
+            function terapkanLangkah(status) {
+                if (! langkahStatus.length) {
+                    return;
+                }
+
+                var posisi = urutanStatus.indexOf(status) + 1;
+
+                langkahStatus.forEach(function (langkah, urutan) {
+                    langkah.classList.remove('is-done', 'is-current');
+
+                    if (posisi > 0) {
+                        if (urutan + 1 < posisi) {
+                            langkah.classList.add('is-done');
+                        }
+
+                        if (urutan + 1 === posisi) {
+                            langkah.classList.add('is-current');
+                        }
+                    }
+                });
+
+                if (garisStatus) {
+                    garisStatus.classList.toggle('d-none', posisi === 0);
                 }
             }
 

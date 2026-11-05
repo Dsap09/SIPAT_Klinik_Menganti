@@ -24,7 +24,7 @@ class AntreanForm
                         ->where('Sisa_Kuota', '>', 0)
                         ->get()
                         ->mapWithKeys(fn (Jadwal $jadwal) => [
-                            $jadwal->ID_Jadwal => "{$jadwal->poli->Nama_Poli} — {$jadwal->dokter->Nama_Dokter} — {$jadwal->Hari_Layanan}, "
+                            $jadwal->ID_Jadwal => "{$jadwal->poli->Nama_Poli} - {$jadwal->dokter->Nama_Dokter} - {$jadwal->Hari_Layanan}, "
                                 .substr($jadwal->Jam_Mulai, 0, 5).'–'.substr($jadwal->Jam_Selesai, 0, 5)
                                 ." (sisa {$jadwal->Sisa_Kuota})",
                         ]))

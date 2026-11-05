@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Foundation\DevCommands;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
@@ -27,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
         Carbon::setLocale(config('app.locale'));
 
         Paginator::useBootstrapFive();
+
+        if (app()->environment('local') && ! env('SIPAT_DEV_VITE')) {
+            DevCommands::except('vite');
+        }
 
         RateLimiter::for('pendaftaran', fn (Request $request) => Limit::perMinute(
             (int) config('sipat.throttle.pendaftaran')

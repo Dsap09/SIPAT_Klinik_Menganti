@@ -73,6 +73,7 @@ class PendaftaranController extends Controller
     public function batal(string $noAntrean): RedirectResponse
     {
         $antrean = $this->cariAntrean($noAntrean);
+        $this->wajibMilikPemilik($antrean);
 
         try {
             $this->queue->batalkan($antrean);
@@ -92,6 +93,7 @@ class PendaftaranController extends Controller
     public function formJadwalUlang(string $noAntrean): View
     {
         $antrean = $this->cariAntrean($noAntrean);
+        $this->wajibMilikPemilik($antrean);
 
         if (! $antrean->bisaDibatalkan()) {
             abort(403, 'Antrean ini tidak dapat dijadwalkan ulang.');
@@ -106,6 +108,7 @@ class PendaftaranController extends Controller
     public function jadwalUlang(Request $request, string $noAntrean): RedirectResponse
     {
         $antrean = $this->cariAntrean($noAntrean);
+        $this->wajibMilikPemilik($antrean);
 
         $data = $request->validate([
             'ID_Jadwal' => ['required', 'string', 'exists:JADWAL,ID_Jadwal'],
@@ -124,6 +127,15 @@ class PendaftaranController extends Controller
         return redirect()
             ->route('pendaftaran.status', $antreanBaru->No_Antrean)
             ->with('sukses', "Pendaftaran dijadwalkan ulang. Nomor antrean baru: {$antreanBaru->No_Antrean}.");
+    }
+
+    private function wajibMilikPemilik(Antrean $antrean): void
+    {
+        abort_unless(
+            $antrean->ID_Pasien === auth('pasien')->id(),
+            403,
+            'Antrean ini bukan milik akun pasien Anda.'
+        );
     }
 
     private function cariAntrean(string $noAntrean): Antrean
