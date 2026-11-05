@@ -121,7 +121,7 @@
                         <div class="col-md-4">
                             <label for="Status_Pernikahan" class="form-label">Status Pernikahan</label>
                             <select name="Status_Pernikahan" id="Status_Pernikahan" class="form-select">
-                                <option value="">— Pilih —</option>
+                                <option value="">- Pilih -</option>
                                 @foreach (['Belum menikah', 'Menikah', 'Cerai hidup', 'Cerai mati'] as $status)
                                     <option value="{{ $status }}" @selected(old('Status_Pernikahan', $pasien->Status_Pernikahan) === $status)>
                                         {{ $status }}

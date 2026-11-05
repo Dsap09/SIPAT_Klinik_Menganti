@@ -53,7 +53,7 @@ class AntreansTable
                 TextColumn::make('Waktu_CheckIn')
                     ->label('Check-in')
                     ->dateTime('H:i')
-                    ->placeholder('—'),
+                    ->placeholder('-'),
             ])
             ->defaultSort('No_Antrean')
             ->filters([

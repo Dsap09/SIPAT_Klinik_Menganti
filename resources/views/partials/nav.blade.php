@@ -42,12 +42,6 @@
                         <a class="btn btn-sm btn-primary" href="{{ route('pendaftaran.form') }}">Daftar Antrean</a>
                     </li>
                 @endauth
-
-                <li class="nav-item">
-                    <a class="btn btn-sm btn-outline-secondary" href="{{ url('/panel') }}">
-                        <x-si-icon name="lock" class="sipat-icon-sm" /> Masuk Petugas
-                    </a>
-                </li>
             </ul>
         </div>
     </div>

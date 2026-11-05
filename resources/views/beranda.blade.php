@@ -12,7 +12,7 @@
                 <h1 class="mt-3 mb-2">{{ config('klinik.tagline') }}</h1>
                 <p class="hero-lead mb-4">
                     Pasien umum dapat mendaftar dari rumah dan datang mendekati jam pelayanan.
-                    Pasien BPJS tetap terlayani pada <strong>satu nomor urut yang sama</strong> — tanpa ada yang tertinggal.
+                    Pasien BPJS tetap terlayani pada <strong>satu nomor urut yang sama</strong> - tanpa ada yang tertinggal.
                 </p>
                 <div class="d-flex flex-wrap gap-2">
                     <a class="btn btn-light btn-lg" href="{{ route('pendaftaran.form') }}">
